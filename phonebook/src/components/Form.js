@@ -1,4 +1,4 @@
-import Input from "./Filter"
+import Input from "./Input"
 import Header from "./Header"
 
 const Form = ({ addNameAndNumber, newName, handleNameChange, newNumber, handleNumberChange }) => {
