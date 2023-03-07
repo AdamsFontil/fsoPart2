@@ -1,4 +1,4 @@
-import Person from './components/Persons'
+import Person from './Persons'
 
 const filteredSearch = ({ filter }) => {
     return (

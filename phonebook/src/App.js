@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Input from './components/Filter'
-import FilteredSearch from './FilteredSearch'
+import FilteredSearch from './components/FilteredSearch'
 import Header from './components/Header'
 import Form from './components/Form'
 
