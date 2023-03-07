@@ -1,0 +1,14 @@
+
+const Person = ({ person }) => {
+    // console.log(person.content)
+    // console.log(person)
+    return (
+        <div>{person.name} {person.number}</div>
+    )
+}
+
+
+
+
+
+export default Person
