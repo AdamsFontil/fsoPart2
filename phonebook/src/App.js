@@ -5,6 +5,7 @@ import Header from './components/Header'
 import Form from './components/Form'
 import axios from 'axios'
 import personService from './services/person'
+import Notification from './components/Notification'
 
 
 axios
@@ -23,6 +24,8 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newSearch, setNewSearch] = useState('')
+  const [newMessage, setNewMessage] = useState(null)
+  const [messageClass, setMessageClass] = useState('success')
   // const [showAll, setShowAll] = useState(true)
 
 
@@ -46,7 +49,7 @@ const addNameAndNumber = (event) => {
     number: newNumber
   }
 
-const person = persons.find(p => p.name === nameObject.name);
+  const person = persons.find(p => p.name === nameObject.name);
 
   if (person) {
     console.log('duplicate', nameObject.name);
@@ -58,31 +61,45 @@ const person = persons.find(p => p.name === nameObject.name);
       console.log('id', person.id)
       console.log('oldNumber', person.number)
 
-       personService
+      personService
         .update(person.id, nameObject)
         .then(returnedPerson => {
           setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
+          setNewName('')
+          setNewNumber('')
+          setNewMessage(`${nameObject.name}'s number has been updated to ${nameObject.number} it used to be ${person.number}`)
+          setMessageClass('success') // set the class to 'success'
+          setTimeout(() => {
+            setNewMessage(null)
+            setMessageClass(null) // reset the class
+          }, 5000)
         })
         .catch(error => {
-          alert(
-            `the note '${person.name}' was already deleted from server`
-            `${error}`
-          )
+          setMessageClass('error') // set the class to 'error'
+          setNewMessage(`${person.name} has already been removed from the server`)
+          setTimeout(() => {
+            setNewMessage(null)
+            setMessageClass(null) // reset the class
+          }, 5000)
           setPersons(persons.filter(p => p.id !== person.id))
         })
     }
   } else {
     personService
-    .create(nameObject)
-    .then(returnedPersons => {
-      setPersons(persons.concat(returnedPersons))
+      .create(nameObject)
+      .then(returnedPersons => {
+        setPersons(persons.concat(returnedPersons))
         setNewName('')
         setNewNumber('')
-  })
-
+        setNewMessage(`${nameObject.name} has been added to the list`)
+        setMessageClass('success') // set the class to 'success'
+        setTimeout(() => {
+          setNewMessage(null)
+          setMessageClass(null) // reset the class
+        }, 5000)
+      })
   }
 }
-
 
 
   const handleNameChange = (event) => {
@@ -93,10 +110,6 @@ const person = persons.find(p => p.name === nameObject.name);
     console.log(event.target.value)
     setNewNumber(event.target.value)
   }
-
-  // const namesToShow = showAll
-  // ? notes
-  // : notes.filter(note => note.important === true)
 
   const handleSearch = (event) => {
     // console.log(event.target.value)
@@ -114,6 +127,12 @@ const person = persons.find(p => p.name === nameObject.name);
       .remove(id)
       .then(() => {
         setPersons(persons.filter(person => person.id !== id))
+        setNewMessage(`${person.name} has been removed from the list`)
+        setMessageClass('success') // set the class to 'success'
+        setTimeout(() => {
+          setNewMessage(null)
+          setMessageClass(null) // reset the class
+        }, 5000)
       })
   }
 }
@@ -125,6 +144,7 @@ const person = persons.find(p => p.name === nameObject.name);
   return (
     <div>
       <Header type='h1' text='Phonebook' />
+      <Notification message={newMessage} messageClass={messageClass} />
       <Input label='filter shown with' newType={newSearch} handleType ={handleSearch} />
       <Form addNameAndNumber={addNameAndNumber} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange} />
       <Header type='h2' text='Number' />
