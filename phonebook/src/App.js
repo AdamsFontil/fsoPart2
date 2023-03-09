@@ -4,14 +4,19 @@ import FilteredSearch from './components/FilteredSearch'
 import Header from './components/Header'
 import Form from './components/Form'
 import axios from 'axios'
+import personService from './services/person'
 
 
 axios
   .get('http://localhost:3001/persons')
   .then(response => {
     const persons = response.data
-    console.log('persons', persons)
+    console.log(persons)
   })
+
+  console.log(personService)
+  console.log(personService.getAll())
+
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -23,12 +28,12 @@ const App = () => {
 
   useEffect(() => {
     console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
+    console.log('effective')
+    personService
+    .getAll()
+    .then(initialPersons => {
+      setPersons(initialPersons)
+    })
   }, [])
   console.log('render', persons.length, 'people')
 
@@ -38,21 +43,46 @@ const addNameAndNumber = (event) => {
   const nameObject = {
     name: newName,
     important: Math.random() < 0.5,
-    id: persons.length + 1,
     number: newNumber
   }
-  if (persons.some(person => person.name === nameObject.name)) {
+
+const person = persons.find(p => p.name === nameObject.name);
+
+  if (person) {
     console.log('duplicate', nameObject.name);
-    alert (`${nameObject.name} is already added to phonebook`)
+    if (window.confirm (`${person.name} is already added to phonebook`)) {
+      console.log('replace old value')
+      console.log('newinfo', nameObject)
+      console.log('newNumber', nameObject.number)
+      console.log('target', person)
+      console.log('id', person.id)
+      console.log('oldNumber', person.number)
+
+       personService
+        .update(person.id, nameObject)
+        .then(returnedPerson => {
+          setPersons(persons.map(p => p.id !== person.id ? p : returnedPerson))
+        })
+        .catch(error => {
+          alert(
+            `the note '${person.name}' was already deleted from server`
+            `${error}`
+          )
+          setPersons(persons.filter(p => p.id !== person.id))
+        })
+    }
   } else {
-  setPersons(persons.concat(nameObject))
-  setNewName('')
-  setNewNumber('')
-  console.log(nameObject)
-  console.log(persons)
-  console.log(nameObject.name)
+    personService
+    .create(nameObject)
+    .then(returnedPersons => {
+      setPersons(persons.concat(returnedPersons))
+        setNewName('')
+        setNewNumber('')
+  })
+
   }
 }
+
 
 
   const handleNameChange = (event) => {
@@ -74,7 +104,22 @@ const addNameAndNumber = (event) => {
     console.log('searching for ...' , newSearch)
     console.log('list of ppl in book', persons)
   }
-  const filteredSearch = persons.filter(person => person.name.toLowerCase().includes(newSearch.toLowerCase()));
+  const handleDelete = (id) => {
+    console.log('this person, id:' + id + ' needs to be deleted')
+
+    const person = persons.find(n => n.id === id)
+    console.log(person)
+    if (window.confirm(`Do you really want to delete ${person.name}?`)) {
+      personService
+      .remove(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+      })
+  }
+}
+
+  const filteredSearch = persons.filter(person => person.name?.toLowerCase().includes(newSearch.toLowerCase()));
+
   console.log('filtered list', filteredSearch)
 
   return (
@@ -83,7 +128,7 @@ const addNameAndNumber = (event) => {
       <Input label='filter shown with' newType={newSearch} handleType ={handleSearch} />
       <Form addNameAndNumber={addNameAndNumber} newName={newName} handleNameChange={handleNameChange} newNumber={newNumber} handleNumberChange={handleNumberChange} />
       <Header type='h2' text='Number' />
-     <FilteredSearch filter={filteredSearch} />
+     <FilteredSearch filter={filteredSearch} handleDelete={handleDelete}/>
     </div>
   )
 }
