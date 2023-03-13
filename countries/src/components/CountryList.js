@@ -1,3 +1,4 @@
+import WeatherInfo from "./WeatherInfo";
 
 const CountryList = ({ countries, handleShowClick}) => {
   console.log(countries); // add this line to check the value of the countries prop
@@ -7,6 +8,13 @@ const CountryList = ({ countries, handleShowClick}) => {
     return <div>{countries}</div>;
   } else if (Array.isArray(countries) && countries.length === 1) {
     const country = countries[0];
+    console.log('country:',countries[0])
+    console.log('country cap:',countries[0].capital)
+    console.log('country cap location:',countries[0].capitalInfo.latlng)
+    console.log('country cap lat:',countries[0].capitalInfo.latlng[0])
+    console.log('country cap lng:',countries[0].capitalInfo.latlng[1])
+    let lat = countries[0].capitalInfo.latlng[0]
+    let lon = countries[0].capitalInfo.latlng[1]
     return (
       <div>
         <div>
@@ -18,6 +26,9 @@ const CountryList = ({ countries, handleShowClick}) => {
             <li key={index}>{language}</li>
           ))}
           <img src={country.flags.png} alt={`${country.name.common} flag`} />
+            <div>
+              <WeatherInfo capital={countries[0].capital} lat={lat} lon ={lon}/>
+            </div>
         </div>
       </div>
     );
